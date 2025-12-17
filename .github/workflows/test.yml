@@ -8,7 +8,7 @@ jobs:
     
     env:
       AGDA_VERSION: 2.7.0.1
-      AGDA_LIB_DIR: $HOME/.agda/libraries
+      AGDA_LIB_DIR: $HOME/.agda
       AGDA_CONF_DIR: $HOME/.agda
       STDLIB_REF: master
 
@@ -29,9 +29,10 @@ jobs:
           mkdir -p ${{ env.AGDA_CONF_DIR }}
           mkdir -p ${{ env.AGDA_LIB_DIR }}
 
+
       - name: Agda stdlib
         run: |
-          mkdir -p ${{ env.AGDA_LIB_DIR }}/standard-library
+          mkdir -p ${{ env.AGDA_LIB_DIR }}
           git clone --depth 1 --branch ${{ env.STDLIB_REF }} https://github.com/agda/agda-stdlib.git ${{ env.AGDA_LIB_DIR }}/standard-library
           if [ ! -f "${{ env.AGDA_LIB_DIR }}/standard-library/standard-library.agda-lib" ]; then
             echo "Cannot find standard-library.agda-lib in the cloned repo"
