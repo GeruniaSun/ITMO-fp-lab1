@@ -55,7 +55,7 @@ jobs:
         id: test7
         run: |
           ./main7 6 100 > output7.txt
-          echo "EXPECTED_OUTPUT=your prime number is: 13" >> $GITHUB_ENV
+          echo 'EXPECTED_OUTPUT="your prime number is: 13"' >> $GITHUB_ENV
           
       - name: check main7 output
         run: |
@@ -72,7 +72,7 @@ jobs:
         id: test24
         run: |
           ./main24 1488 > output24.txt
-          echo "EXPECTED_OUTPUT_24=result: [0, 1, 2, 5, 3, 7, 4, 6, 8, 9]" >> $GITHUB_ENV 
+          echo 'EXPECTED_OUTPUT_24="result: [0, 1, 2, 5, 3, 7, 4, 6, 8, 9]"' >> $GITHUB_ENV 
 
       - name: check main24 output
         run: |
