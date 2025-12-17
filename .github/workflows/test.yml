@@ -10,6 +10,7 @@ jobs:
       AGDA_VERSION: 2.7.0.1
       AGDA_LIB_DIR: $HOME/.agda/libraries
       AGDA_CONF_DIR: $HOME/.agda
+      STDLIB_REF: master
 
     steps:
       - name: Checkout
@@ -27,6 +28,18 @@ jobs:
           cabal install Agda-${{ env.AGDA_VERSION }}
           mkdir -p ${{ env.AGDA_CONF_DIR }}
           mkdir -p ${{ env.AGDA_LIB_DIR }}
+
+      - name: Agda stdlib
+        run: |
+          mkdir -p ${{ env.AGDA_LIB_DIR }}/standard-library
+          git clone --depth 1 --branch ${{ env.STDLIB_REF }} https://github.com/agda/agda-stdlib.git ${{ env.AGDA_LIB_DIR }}/standard-library
+          if [ ! -f "${{ env.AGDA_LIB_DIR }}/standard-library/standard-library.agda-lib" ]; then
+            echo "Cannot find standard-library.agda-lib in the cloned repo"
+            ls -la ${{ env.AGDA_LIB_DIR }}/standard-library
+            exit 1
+          fi
+          echo "${{ env.AGDA_LIB_DIR }}/standard-library/standard-library.agda-lib" >> ${{ env.AGDA_CONF_DIR }}/libraries
+          echo "standard-library" >> ${{ env.AGDA_CONF_DIR }}/defaults
           
       - name: Compile
         run: |
