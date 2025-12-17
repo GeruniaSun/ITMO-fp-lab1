@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      AGDA_VERSION: 2.3
+      AGDA_VERSION: 2.7.0.1
       AGDA_LIB_DIR: $HOME/.agda/libraries
       AGDA_CONF_DIR: $HOME/.agda
 
