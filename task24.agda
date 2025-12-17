@@ -1,6 +1,6 @@
 module task24 where
 
-open import Agda.Builtin.Nat using (Nat)
+open import Agda.Builtin.Nat using (Nat; _*_)
 open import Relation.Nullary using (Dec; yes; no)
 open import Data.Nat using (ℕ; zero; suc; _∸_)
 open import Data.Nat.Base using (_!)
@@ -36,18 +36,25 @@ pickAt (suc i) (x ∷ y ∷ ys) with pickAt i (y ∷ ys)
 ... | nothing         = nothing
 ... | just (p , rest) = just (p , x ∷ rest)
 
+-- кастомный факториал, который пользует хвостовую рекурсию
+factAcc : ℕ → ℕ → ℕ
+factAcc zero acc      = acc
+factAcc (suc n) acc   = factAcc n (acc * suc n)
+
+factTail : ℕ → ℕ
+factTail n = factAcc n 1
+
 -- n-ая перестановка
 {-# TERMINATING #-}
-nthPermVecMaybe : ∀ {m} → ℕ → Vec ℕ m → Maybe (Vec ℕ m)
-nthPermVecMaybe {zero} _ [] = just []
-nthPermVecMaybe {suc n} k v@(x ∷ xs)
-  with pickAt (divNat k (n !)) v
+nthPermVecMaybe : ∀ {m} → (fact : ℕ → ℕ) → ℕ → Vec ℕ m → Maybe (Vec ℕ m)
+nthPermVecMaybe {m = zero} fact _ [] = just []
+nthPermVecMaybe {m = suc n} fact k v@(x ∷ xs)
+  with pickAt (divNat k (fact n)) v
 ... | nothing = nothing
 ... | just (d , rest)
-  with nthPermVecMaybe (modNat k (n !)) rest
+  with nthPermVecMaybe fact (modNat k (fact n)) rest
 ... | nothing = nothing
 ... | just tail = just (d ∷ tail)
-
 
 -- интересующие меня цифры
 digitsVec : Vec ℕ 10
