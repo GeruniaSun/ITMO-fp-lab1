@@ -1,0 +1,72 @@
+name: agda agda agda
+
+on: [push, pull_request]
+
+jobs:
+  test-agda-mains:
+    runs-on: ubuntu-latest
+    
+    env:
+      AGDA_VERSION: 2.3
+      AGDA_LIB_DIR: $HOME/.agda/libraries
+      AGDA_CONF_DIR: $HOME/.agda
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: haskell/actions/setup@v2
+        with:
+          ghc-version: '9.4.5'
+          cabal-version: '3.10'
+          
+      - name: Install
+        run: |
+          cabal update
+          cabal install agda-${{ env.AGDA_VERSION }}
+          mkdir -p ${{ env.AGDA_CONF_DIR }}
+          mkdir -p ${{ env.AGDA_LIB_DIR }}
+          
+      - name: Compile
+        run: |
+          agda --compile main7.agda
+          agda --compile main24.agda
+          
+          cp main7.agda.bin main7
+          cp main24.agda.bin main24
+          chmod +x main7 main24
+          
+      # --- тест для 7-ой задачи ---
+      
+      - name: run amin7
+        id: test7
+        run: |
+          ./main7 6 100 > output7.txt
+          echo "EXPECTED_OUTPUT=your prime number is: 13" >> $GITHUB_ENV
+          
+      - name: check main7 output
+        run: |
+          ACTUAL=$(cat output7.txt)
+          EXPECTED=${{ env.EXPECTED_OUTPUT }}
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "Test FAILED: Expected '$EXPECTED', got '$ACTUAL'"
+            exit 1
+          fi
+
+      # --- тест для 24-ой задачи ---
+
+      - name: run main24
+        id: test24
+        run: |
+          ./main24 1488 > output24.txt
+          echo "EXPECTED_OUTPUT_24=result: [0, 1, 2, 5, 3, 7, 4, 6, 8, 9]" >> $GITHUB_ENV 
+
+      - name: check main24 output
+        run: |
+          ACTUAL=$(cat output24.txt)
+          EXPECTED=${{ env.EXPECTED_OUTPUT_24 }}
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "Test FAILED: Expected '$EXPECTED', got '$ACTUAL'"
+            exit 1
+          fi
