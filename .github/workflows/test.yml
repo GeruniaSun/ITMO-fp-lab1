@@ -47,8 +47,6 @@ jobs:
           agda --compile main7.agda
           agda --compile main24.agda
           
-          cp main7.agda.bin main7
-          cp main24.agda.bin main24
           chmod +x main7 main24
           
       # --- тест для 7-ой задачи ---
