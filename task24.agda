@@ -9,7 +9,7 @@ open import Data.Bool using (Bool)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Vec using (Vec; []; _∷_; toList)
 open import Data.Product using (_×_; _,_)
-open import Data.List using (List)
+open import Data.List using (List; []; _∷_; foldl)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 -- //
@@ -55,6 +55,45 @@ nthPermVecMaybe {m = suc n} fact k v@(x ∷ xs)
   with nthPermVecMaybe fact (modNat k (fact n)) rest
 ... | nothing = nothing
 ... | just tail = just (d ∷ tail)
+
+-- секция легкой шизы
+-- =============================================================================
+-- список факториалов от n до 0 (fact n, fact (n-1), ..., fact 0)
+factListFrom : (fact : ℕ → ℕ) → ℕ → List ℕ
+factListFrom fact zero    = List._∷_ (fact 0) List.[]
+factListFrom fact (suc i) = List._∷_ (fact (suc i)) (factListFrom fact i)
+
+-- вспомогательная функция для получения второго компонента пары
+proj₂ : ∀ {a b} {A : Set a} {B : Set b} → A × B → B
+proj₂ (_ , y) = y
+
+-- computeQs через foldl
+computeQs : ℕ → List ℕ → List ℕ
+computeQs k facts =
+  let step : (ℕ × List ℕ) → ℕ → (ℕ × List ℕ)
+    step (k' , acc) f = ( modNat k' f , divNat k' f ∷ acc )
+  in
+  let res = foldl step (k , []) facts
+  in reverse (proj₂ res)
+
+-- применяет список индексов к вектору и собирает результат как Vec
+pickAllToVec : ∀ {r} → List ℕ → Vec ℕ r → Maybe (Vec ℕ r)
+pickAllToVec List.[]       []       = just []
+pickAllToVec (List._∷_ i is) (y ∷ ys) with pickAt i (y ∷ ys)
+... | nothing         = nothing
+... | just (d , rest) with pickAllToVec is rest
+... | nothing         = nothing
+... | just tail       = just (d ∷ tail)
+pickAllToVec _ _ = nothing  -- безопасный catch-all, если длины не сходятся
+
+-- альтернативная версия nthPerm (без вложенных функций)
+{-# TERMINATING #-}
+nthPermVecMaybeAlt : ∀ {m} → (fact : ℕ → ℕ) → ℕ → Vec ℕ m → Maybe (Vec ℕ m)
+nthPermVecMaybeAlt {m = zero} fact _ [] = just []
+nthPermVecMaybeAlt {m = suc n} fact k v =
+  let qs = computeQs k (factListFrom fact n)
+  in pickAllToVec qs v
+-- =============================================================================
 
 -- интересующие меня цифры
 digitsVec : Vec ℕ 10
